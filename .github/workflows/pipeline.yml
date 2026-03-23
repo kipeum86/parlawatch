@@ -2,6 +2,7 @@ name: ParlaWatch Pipeline
 
 on:
   schedule:
+    # 매일 새벽 2시 KST (국감 기간 중에만 실행). 필요시 시간 변경.
     - cron: '0 17 * * *'
   workflow_dispatch:
     inputs:
