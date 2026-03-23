@@ -1,0 +1,39 @@
+# GCP Service Account credentials
+studio-*.json
+service-account*.json
+sa.json
+
+# Design docs
+parlawatch-design-spec-final.md
+ParlaWatch_사용설명서.md
+architecture.html
+
+# Environment
+.env
+.env.*
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+venv/
+.venv/
+*.egg-info/
+dist/
+build/
+
+# yt-dlp output
+*.vtt
+*.srt
+
+# IDE
+.vscode/
+.idea/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Node (if any)
+node_modules/
+.gstack/
