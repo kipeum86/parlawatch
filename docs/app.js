@@ -47,25 +47,6 @@ let _currentSearch = '';
 let _visibleGroups = 0;
 let _viewMode = localStorage.getItem('parlawatch_view') || 'card';
 
-// 기본 키워드 (pipeline/config.py 미러링)
-const DEFAULT_INCLUDE_KEYWORDS = [
-  "게임", "게임산업", "게임업계", "온라인게임", "모바일게임", "PC게임",
-  "콘솔게임", "비디오게임", "게임사",
-  "확률형 아이템", "가챠", "셧다운제", "게임 이용등급", "게임물등급위원회",
-  "게임물관리위원회", "게임 과몰입", "게임 중독", "게임 사행성",
-  "게임 규제", "게임 셧다운", "게임법", "게임 자율규제",
-  "e스포츠", "이스포츠", "esports", "프로게이머",
-  "게임 콘텐츠", "게임 수출", "게임 시장",
-  "게임 개발", "게임 엔진",
-];
-const DEFAULT_EXCLUDE_KEYWORDS = [
-  "게임 체인저", "게임체인저",
-  "머니 게임", "머니게임",
-  "치킨 게임", "치킨게임",
-  "제로섬 게임", "제로섬게임",
-  "블레임 게임", "블레임게임",
-  "네임 게임", "네임게임",
-];
 
 // ──────────────────────────────────────────────
 // 유틸: Sheets 날짜 시리얼 넘버 → YYYY-MM-DD 변환
@@ -267,9 +248,9 @@ function applyFilters() {
     });
   }
 
-  // 게임 토글 버튼 동기화
-  const gameToggle = document.getElementById('btn-game-toggle');
-  if (gameToggle) gameToggle.classList.toggle('active', category === 'game');
+  // 도메인 토글 버튼 동기화
+  const domainToggle = document.getElementById('btn-domain-toggle');
+  if (domainToggle) domainToggle.classList.toggle('active', category === 'domain');
 
   updateStats(filtered);
   renderAgendas(filtered, search);
@@ -377,12 +358,12 @@ function loadMore() {
 }
 
 function renderAgendaCard(agenda, searchTerm) {
-  const isGame = agenda.category === 'game';
+  const isDomain = agenda.category === 'domain';
   const isMentioned = agenda.isCompanyMentioned;
 
   const classes = [
     'agenda-card',
-    isGame ? 'game' : '',
+    isDomain ? 'domain' : '',
     isMentioned ? 'company-mentioned' : '',
   ].filter(Boolean).join(' ');
 
@@ -392,7 +373,7 @@ function renderAgendaCard(agenda, searchTerm) {
   return `
     <div class="${classes}" onclick="toggleDetail(this)">
       <div class="agenda-header">
-        <span class="agenda-badge ${agenda.category}">${isGame ? '게임' : '일반'}</span>
+        <span class="agenda-badge ${agenda.category}">${isDomain ? '관심 분야' : '일반'}</span>
         ${agenda.event_type && agenda.event_type !== '국정감사' ? `<span class="agenda-badge event-type">${agenda.event_type}</span>` : ''}
         <span class="agenda-title">${title}</span>
       </div>
@@ -408,12 +389,12 @@ function renderAgendaCard(agenda, searchTerm) {
 }
 
 function renderAgendaListItem(agenda, searchTerm) {
-  const isGame = agenda.category === 'game';
+  const isDomain = agenda.category === 'domain';
   const isMentioned = agenda.isCompanyMentioned;
 
   const classes = [
     'agenda-list-item',
-    isGame ? 'game' : '',
+    isDomain ? 'domain' : '',
     isMentioned ? 'company-mentioned' : '',
   ].filter(Boolean).join(' ');
 
@@ -421,7 +402,7 @@ function renderAgendaListItem(agenda, searchTerm) {
 
   return `
     <div class="${classes}" onclick="toggleDetail(this)">
-      <span class="agenda-badge ${agenda.category}">${isGame ? '게임' : '일반'}</span>
+      <span class="agenda-badge ${agenda.category}">${isDomain ? '관심 분야' : '일반'}</span>
       ${isMentioned ? '<span class="agenda-list-star">★</span>' : ''}
       <span class="agenda-title">${title}</span>
       <span class="agenda-meta">${agenda.committee} · ${agenda.date}</span>
@@ -528,10 +509,10 @@ function updateStats(filtered) {
   const bar = document.getElementById('stats-bar');
   bar.style.display = filtered.length ? 'flex' : 'none';
   document.getElementById('stats-total').textContent = `전체 ${filtered.length}건`;
-  const gameCount = filtered.filter(a => a.category === 'game').length;
-  document.getElementById('stats-game').textContent = `게임 관련 ${gameCount}건`;
+  const domainCount = filtered.filter(a => a.category === 'domain').length;
+  document.getElementById('stats-domain').textContent = `관심 분야 ${domainCount}건`;
   const companyCount = filtered.filter(a => a.isCompanyMentioned).length;
-  document.getElementById('stats-company').textContent = `게임사 언급 ${companyCount}건`;
+  document.getElementById('stats-company').textContent = `기관 언급 ${companyCount}건`;
 }
 
 async function refreshData() {
@@ -568,9 +549,9 @@ function resetFilterOptions() {
   }
 }
 
-function toggleGameFilter() {
+function toggleDomainFilter() {
   const select = document.getElementById('filter-category');
-  select.value = select.value === 'game' ? '' : 'game';
+  select.value = select.value === 'domain' ? '' : 'domain';
   applyFilters();
 }
 
@@ -579,8 +560,8 @@ function resetFilters() {
   document.getElementById('filter-committee').value = '';
   document.getElementById('filter-category').value = '';
   document.getElementById('filter-search').value = '';
-  const gameToggle = document.getElementById('btn-game-toggle');
-  if (gameToggle) gameToggle.classList.remove('active');
+  const domainToggle = document.getElementById('btn-domain-toggle');
+  if (domainToggle) domainToggle.classList.remove('active');
   applyFilters();
 }
 
@@ -608,13 +589,11 @@ function renderInfoChips() {
   if (!container) return;
 
   const videoCount = allProcessedVideos.length;
-  const userInclude = allUserKeywords.filter(k => (k.type || 'include') === 'include');
-  const userExclude = allUserKeywords.filter(k => k.type === 'exclude');
-  const totalInclude = DEFAULT_INCLUDE_KEYWORDS.length + userInclude.length;
-  const totalExclude = DEFAULT_EXCLUDE_KEYWORDS.length + userExclude.length;
+  const includeKw = allUserKeywords.filter(k => (k.type || 'include') === 'include');
+  const excludeKw = allUserKeywords.filter(k => k.type === 'exclude');
 
   document.getElementById('chip-videos-label').textContent = `영상 ${videoCount}건 처리`;
-  document.getElementById('chip-keywords-label').textContent = `키워드 ${totalInclude}+${totalExclude}개`;
+  document.getElementById('chip-keywords-label').textContent = `키워드 ${includeKw.length}+${excludeKw.length}개`;
 
   container.style.display = 'flex';
 }
@@ -671,34 +650,29 @@ function renderVideosModal() {
 
 function renderKeywordsModal() {
   const body = document.getElementById('modal-keywords-body');
-  const userInclude = allUserKeywords.filter(k => (k.type || 'include') === 'include');
-  const userExclude = allUserKeywords.filter(k => k.type === 'exclude');
+  const includeKw = allUserKeywords.filter(k => (k.type || 'include') === 'include');
+  const excludeKw = allUserKeywords.filter(k => k.type === 'exclude');
 
-  function renderTags(defaults, userAdded, isExclude) {
+  function renderTags(keywords, isExclude) {
     const cls = isExclude ? ' exclude' : '';
-    const defaultTags = defaults.map(kw =>
-      `<span class="keyword-tag${cls}">${escapeHtml(kw)}</span>`
+    return keywords.map(k =>
+      `<span class="keyword-tag${cls}" title="${escapeHtml(k.note || '')}">${escapeHtml(k.keyword)}</span>`
     ).join('');
-    const userTags = userAdded.map(k =>
-      `<span class="keyword-tag user-added${cls}" title="${escapeHtml(k.note || '사용자 추가')}">${escapeHtml(k.keyword)}</span>`
-    ).join('');
-    return defaultTags + userTags;
   }
 
   body.innerHTML = `
     <div class="keyword-section">
-      <div class="keyword-section-title">포함 키워드 (기본 ${DEFAULT_INCLUDE_KEYWORDS.length}개${userInclude.length ? ' + 추가 ' + userInclude.length + '개' : ''})</div>
+      <div class="keyword-section-title">포함 키워드 (${includeKw.length}개)</div>
       <div class="keyword-tags">
-        ${renderTags(DEFAULT_INCLUDE_KEYWORDS, userInclude, false)}
+        ${renderTags(includeKw, false)}
       </div>
     </div>
     <div class="keyword-section">
-      <div class="keyword-section-title">제외 키워드 (기본 ${DEFAULT_EXCLUDE_KEYWORDS.length}개${userExclude.length ? ' + 추가 ' + userExclude.length + '개' : ''})</div>
+      <div class="keyword-section-title">제외 키워드 (${excludeKw.length}개)</div>
       <div class="keyword-tags">
-        ${renderTags(DEFAULT_EXCLUDE_KEYWORDS, userExclude, true)}
+        ${renderTags(excludeKw, true)}
       </div>
-    </div>
-    ${userInclude.length || userExclude.length ? '<p style="font-size:11px;color:var(--color-text-secondary);margin-top:8px;">점선 테두리 = 사용자 추가 키워드</p>' : ''}`;
+    </div>`;
 }
 
 // ── 모달 닫기 애니메이션 공통 ──
