@@ -115,18 +115,63 @@ print(f"Spreadsheet ID: {spreadsheet_id}")
 
 답변을 바탕으로 `config.yaml`을 자동 업데이트하세요.
 
-### Phase 5: GitHub 설정
+### Phase 5: GitHub + 대시보드 설정
 
-GitHub Actions를 사용하려면:
+#### 5-1. GitHub 레포 생성 + push
 
-1. GitHub에 ParlaWatch 레포 생성
-2. Repository Settings → Secrets and variables → Actions에서 추가:
-   - `GOOGLE_SERVICE_ACCOUNT_JSON`: sa.json 내용 전체
-   - `SPREADSHEET_ID`: 위에서 생성한 ID
-   - `ANTHROPIC_API_KEY`: Anthropic API 키
-   - `NAVER_CLIENT_ID`: (선택)
-   - `NAVER_CLIENT_SECRET`: (선택)
-3. `docs/config.js`에 SPREADSHEET_ID, SHEETS_API_KEY, GH_OWNER, GH_REPO 기입
+```bash
+gh repo create 레포이름 --public --source . --push
+```
+
+또는 수동으로:
+1. GitHub에서 새 레포 생성
+2. `git remote add origin https://github.com/아이디/레포이름.git && git push -u origin main`
+
+#### 5-2. GitHub Pages 활성화 (대시보드 배포)
+
+1. GitHub 레포 → **Settings** 탭
+2. 좌측 **Pages** 메뉴
+3. Source: **Deploy from a branch**
+4. Branch: `main`, Folder: `/docs` 선택 → **Save**
+5. 1-2분 후 `https://아이디.github.io/레포이름/` 에서 대시보드 접속 가능
+
+#### 5-3. 대시보드 설정값 입력
+
+`docs/config.js`를 열고 빈 값을 채워넣으세요:
+
+```javascript
+const CONFIG = {
+  SPREADSHEET_ID: 'Phase 3에서 생성한 ID',
+  SHEETS_API_KEY: 'Google Cloud에서 만든 API 키',
+  GH_OWNER: 'GitHub 아이디',
+  GH_REPO: '레포 이름',
+  // ...
+};
+```
+
+> **Google Sheets API 키 만드는 법:** Google Cloud Console → API 및 서비스 → 사용자 인증 정보 → 사용자 인증 정보 만들기 → API 키. Google Sheets API만 허용하도록 제한 권장.
+
+변경 후 commit + push하세요.
+
+#### 5-4. GitHub Actions Secrets 등록
+
+GitHub 레포 → **Settings** → **Secrets and variables** → **Actions** → **New repository secret**:
+
+| Secret 이름 | 값 |
+|------------|-----|
+| `GOOGLE_SERVICE_ACCOUNT_JSON` | `sa.json` 파일 내용 전체 (JSON 텍스트) |
+| `SPREADSHEET_ID` | Phase 3에서 생성한 ID |
+| `ANTHROPIC_API_KEY` | Anthropic API 키 |
+| `NAVER_CLIENT_ID` | (선택) |
+| `NAVER_CLIENT_SECRET` | (선택) |
+
+#### 5-5. 대시보드에서 파이프라인 실행을 위한 PAT 설정
+
+대시보드에서 "전체 파이프라인 실행" 버튼을 사용하려면 GitHub PAT이 필요합니다:
+
+1. GitHub → Settings → Developer settings → Personal access tokens → Tokens (classic)
+2. **Generate new token** → `repo`, `workflow` 권한 선택 → 생성
+3. 대시보드 접속 → ⚙ 설정 버튼 → PAT 입력
 
 ### Phase 6: 테스트 실행
 
