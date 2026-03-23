@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ParlaWatch 시스템 아키텍처</title>
+  <style>
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      background: #f8fafc;
+      margin: 0;
+      padding: 24px;
+      color: #1e293b;
+    }
+    h1 {
+      text-align: center;
+      color: #2563eb;
+      margin-bottom: 8px;
+    }
+    .subtitle {
+      text-align: center;
+      color: #64748b;
+      font-size: 14px;
+      margin-bottom: 32px;
+    }
+    .diagram-section {
+      max-width: 1000px;
+      margin: 0 auto 48px;
+      background: white;
+      border-radius: 12px;
+      padding: 24px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    }
+    .diagram-section h2 {
+      font-size: 18px;
+      margin-bottom: 16px;
+      padding-bottom: 8px;
+      border-bottom: 2px solid #e2e8f0;
+    }
+    .mermaid {
+      display: flex;
+      justify-content: center;
+    }
+  </style>
+</head>
+<body>
+  <h1>ParlaWatch 시스템 아키텍처</h1>
+  <p class="subtitle">범용 국회 모니터링 자동화 시스템</p>
+
+  <!-- 1. 전체 흐름 -->
+  <div class="diagram-section">
+    <h2>1. 전체 파이프라인 흐름</h2>
+    <div class="mermaid">
+flowchart LR
+  A["유튜브 영상"] --> B["자막 추출"]
+  B --> C["AI 분석\n(Claude)"]
+  C --> D["Google Sheets\n저장"]
+  D --> E["대시보드\n표시"]
+
+  style A fill:#dbeafe,stroke:#2563eb
+  style B fill:#fef3c7,stroke:#f59e0b
+  style C fill:#f0fdf4,stroke:#22c55e
+  style D fill:#ede9fe,stroke:#8b5cf6
+  style E fill:#dbeafe,stroke:#2563eb
+    </div>
+  </div>
+
+  <!-- 2. 자막 추출 체인 -->
+  <div class="diagram-section">
+    <h2>2. 자막 추출 Fallback 체인</h2>
+    <div class="mermaid">
+flowchart TD
+  START["영상 분석 요청"] --> CHECK{"브라우저에서\n자막 전달?"}
+  CHECK -- "있음" --> BROWSER["브라우저 전달 자막\n(gzip+base64)"]
+  CHECK -- "없음" --> YTT["1차: youtube-transcript-api"]
+  YTT -- "성공" --> DONE["자막 확보"]
+  YTT -- "실패\n(IP 차단 등)" --> NLM["2차: NotebookLM-py\n(Google 인프라 경유)"]
+  NLM -- "성공" --> DONE
+  NLM -- "실패/미설정" --> YTDLP["3차: yt-dlp\n(최후 수단)"]
+  YTDLP -- "성공" --> DONE
+  YTDLP -- "실패" --> NOSUB["자막 없음\n(스킵)"]
+  BROWSER --> DONE
+
+  style BROWSER fill:#dbeafe,stroke:#2563eb
+  style YTT fill:#fef3c7,stroke:#f59e0b
+  style NLM fill:#f0fdf4,stroke:#22c55e
+  style YTDLP fill:#fee2e2,stroke:#ef4444
+  style DONE fill:#dcfce7,stroke:#16a34a
+  style NOSUB fill:#fef2f2,stroke:#dc2626
+    </div>
+  </div>
+
+  <!-- 3. LLM 분석 2-Pass -->
+  <div class="diagram-section">
+    <h2>3. AI 분석 (2-Pass 구조)</h2>
+    <div class="mermaid">
+flowchart TD
+  SUB["자막 텍스트"] --> KW{"도메인 키워드\n포함?"}
+  KW -- "예/아니오" --> P1["Pass 1: 전체 안건 구조화\n(Claude Haiku)"]
+  P1 --> RESULT1["안건 목록\n(domain / general 분류)"]
+  KW -- "예" --> P2CHECK{"general 안건 중\n도메인 관련 누락?"}
+  RESULT1 --> P2CHECK
+  P2CHECK -- "있음" --> P2["Pass 2: 재분류 검증\n(Claude Haiku)"]
+  P2 --> MERGE["재분류 병합"]
+  P2CHECK -- "없음" --> FINAL["최종 안건 목록"]
+  MERGE --> FINAL
+
+  FINAL --> SHEETS["Google Sheets 저장"]
+  SHEETS --> |"agendas"| AG["안건 목록"]
+  SHEETS --> |"statements"| ST["발언 상세"]
+  SHEETS --> |"news_articles"| NW["관련 뉴스"]
+
+  style P1 fill:#f0fdf4,stroke:#22c55e
+  style P2 fill:#fef3c7,stroke:#f59e0b
+  style FINAL fill:#dcfce7,stroke:#16a34a
+  style AG fill:#ede9fe,stroke:#8b5cf6
+  style ST fill:#ede9fe,stroke:#8b5cf6
+  style NW fill:#ede9fe,stroke:#8b5cf6
+    </div>
+  </div>
+
+  <!-- 4. 실행 경로 -->
+  <div class="diagram-section">
+    <h2>4. 실행 경로</h2>
+    <div class="mermaid">
+flowchart TD
+  CRON["매일 새벽 2시\n(cron)"] --> PERIOD{"국감 기간\n내?"}
+  PERIOD -- "예" --> AUTO["자동 실행\n(상임위 영상 검색)"]
+  PERIOD -- "아니오" --> SKIP["스킵"]
+
+  MANUAL["대시보드\n'영상 분석 요청'"] --> ALWAYS["항상 실행\n(기간 무관)"]
+  PIPELINE["대시보드\n'전체 파이프라인 실행'"] --> ALWAYS
+
+  AUTO --> ACTIONS["GitHub Actions"]
+  ALWAYS --> ACTIONS
+  ACTIONS --> RUN["파이프라인 실행\n(자막→분석→저장)"]
+  RUN --> RESULT["결과: Google Sheets"]
+  RESULT --> DASH["대시보드 새로고침\n시 반영"]
+
+  style CRON fill:#dbeafe,stroke:#2563eb
+  style MANUAL fill:#fef3c7,stroke:#f59e0b
+  style PIPELINE fill:#fef3c7,stroke:#f59e0b
+  style ACTIONS fill:#1e293b,stroke:#1e293b,color:#fff
+  style DASH fill:#dcfce7,stroke:#16a34a
+  style SKIP fill:#fef2f2,stroke:#dc2626
+    </div>
+  </div>
+
+  <!-- 5. 데이터 흐름 -->
+  <div class="diagram-section">
+    <h2>5. 데이터 저장 구조 (Google Sheets)</h2>
+    <div class="mermaid">
+erDiagram
+  _processed_videos {
+    string video_id PK
+    string committee
+    string date
+    string status
+    string subtitle_source
+  }
+  agendas {
+    string agenda_id PK
+    string video_id FK
+    string committee
+    string date
+    string category
+    string title
+    string summary
+    string is_entity_mentioned
+    string entity_mention_detail
+    string event_type
+  }
+  statements {
+    string statement_id PK
+    string agenda_id FK
+    string speaker_name
+    string speaker_party
+    string speaker_role
+    string content
+  }
+  news_articles {
+    string article_id PK
+    string agenda_id FK
+    string title
+    string url
+    string publisher
+  }
+  _keywords {
+    string keyword PK
+    string type
+    string note
+  }
+
+  _processed_videos ||--o{ agendas : "video_id"
+  agendas ||--o{ statements : "agenda_id"
+  agendas ||--o{ news_articles : "agenda_id"
+    </div>
+  </div>
+
+  <!-- 6. 프론트엔드 구조 -->
+  <div class="diagram-section">
+    <h2>6. 프론트엔드 구성</h2>
+    <div class="mermaid">
+flowchart LR
+  subgraph "브라우저 (GitHub Pages)"
+    INDEX["index.html"] --> CONFIG["config.js\n(Sheets API키, repo 설정)"]
+    INDEX --> APP["app.js\n(데이터 로드, 필터, 렌더링)"]
+    INDEX --> REPORT["report.js\n(보고서 생성, 클립보드)"]
+    INDEX --> TRIGGER["trigger.js\n(파이프라인 트리거, 상태 폴링)"]
+    INDEX --> STYLE["styles.css\n(반응형 디자인)"]
+  end
+
+  APP --> |"Sheets API\n(읽기)"| SHEETS["Google Sheets"]
+  TRIGGER --> |"Actions API\n(실행/상태)"| GHAPI["GitHub API"]
+
+  style INDEX fill:#dbeafe,stroke:#2563eb
+  style SHEETS fill:#ede9fe,stroke:#8b5cf6
+  style GHAPI fill:#1e293b,stroke:#1e293b,color:#fff
+    </div>
+  </div>
+
+  <!-- 7. 셋업 위저드 흐름 -->
+  <div class="diagram-section">
+    <h2>7. 셋업 위저드 흐름</h2>
+    <div class="mermaid">
+flowchart LR
+  P1["Phase 1\n사전 준비물"] --> P2["Phase 2\nAPI 검증"]
+  P2 --> P3["Phase 3\nSheets 생성"]
+  P3 --> P4["Phase 4\n도메인 설정"]
+  P4 --> P5["Phase 5\nGitHub 설정"]
+  P5 --> P6["Phase 6\n테스트"]
+
+  style P1 fill:#dbeafe,stroke:#2563eb
+  style P2 fill:#fef3c7,stroke:#f59e0b
+  style P3 fill:#f0fdf4,stroke:#22c55e
+  style P4 fill:#ede9fe,stroke:#8b5cf6
+  style P5 fill:#1e293b,stroke:#1e293b,color:#fff
+  style P6 fill:#dcfce7,stroke:#16a34a
+    </div>
+  </div>
+
+  <script type="module">
+    import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs';
+    mermaid.initialize({
+      startOnLoad: true,
+      theme: 'default',
+      flowchart: { curve: 'basis', padding: 16 },
+      er: { useMaxWidth: true },
+    });
+  </script>
+</body>
+</html>
