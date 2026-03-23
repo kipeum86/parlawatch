@@ -50,6 +50,11 @@ def run_pipeline():
 
     # ── 설정 로드 ──
     config = load_config()
+
+    from .config import validate_config_for_pipeline
+    if not validate_config_for_pipeline(config):
+        sys.exit(1)
+
     sa_file = os.environ.get(ENV_GOOGLE_CREDENTIALS, "")
     spreadsheet_id = os.environ.get(ENV_SPREADSHEET_ID, "")
     anthropic_key = os.environ.get(ENV_ANTHROPIC_API_KEY, "")
@@ -73,11 +78,16 @@ def run_pipeline():
             results_per_agenda=config.get("pipeline", {}).get("news_results_per_agenda", 5),
         )
 
-    company_names = config.get("company_names", [])
+    entity_names = config.get("entity_names", [])
+    domain = config.get("domain", {})
+    domain_name = domain.get("name", "")
+    domain_description = domain.get("description", "")
+    config_include = config.get("keywords", {}).get("include", [])
+    config_exclude = config.get("keywords", {}).get("exclude", [])
 
     # 사용자 키워드 병합
     user_include, user_exclude = sheets.get_user_keywords()
-    include_kw, exclude_kw = merge_keywords(user_include, user_exclude)
+    include_kw, exclude_kw = merge_keywords(config_include, config_exclude, user_include, user_exclude)
     logger.info("키워드: include=%d개, exclude=%d개", len(include_kw), len(exclude_kw))
 
     # ── 1. 영상 감지 ──
@@ -164,13 +174,14 @@ def run_pipeline():
 
             # 3. 텍스트 처리 (키워드 필터 + LLM)
             agendas_raw = process_text(
-                subtitle_text, llm, company_names, include_kw, exclude_kw,
+                subtitle_text, llm, domain_name, domain_description,
+                entity_names, include_kw, exclude_kw,
             )
 
             # 4. 뉴스 검색 (game 안건만)
             if news_searcher:
                 for agenda in agendas_raw:
-                    if agenda.get("category") == "game":
+                    if agenda.get("category") == "domain":
                         agenda["news_articles"] = news_searcher.search_for_agenda(agenda)
 
             # 5. Sheets 기록
@@ -222,8 +233,8 @@ def _write_results(sheets: SheetsClient, video, subtitle_source: str, agendas_ra
             "category": agenda.get("category", "general"),
             "title": agenda.get("title", ""),
             "summary": agenda.get("summary", ""),
-            "is_company_mentioned": str(agenda.get("is_company_mentioned", False)).upper(),
-            "company_mention_detail": agenda.get("company_mention_detail", ""),
+            "is_entity_mentioned": str(agenda.get("is_entity_mentioned", False)).upper(),
+            "entity_mention_detail": agenda.get("entity_mention_detail", ""),
             "sort_order": str(i + 1),
             "event_type": video.event_type,
         })
