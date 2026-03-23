@@ -5,7 +5,7 @@
 :root {
   --color-primary: #2563eb;
   --color-primary-hover: #1d4ed8;
-  --color-game: #3b82f6;
+  --color-domain: #3b82f6;
   --color-company: #f59e0b;
   --color-bg: #f8fafc;
   --color-surface: #ffffff;
@@ -21,7 +21,7 @@
 [data-theme="dark"] {
   --color-primary: #1d9bd1;
   --color-primary-hover: #4db8e0;
-  --color-game: #1d9bd1;
+  --color-domain: #1d9bd1;
   --color-company: #e8a230;
   --color-bg: #1a1d21;
   --color-surface: #222529;
@@ -215,9 +215,9 @@ body {
 }
 
 .btn-chip.active {
-  background: var(--color-game);
+  background: var(--color-domain);
   color: white;
-  border-color: var(--color-game);
+  border-color: var(--color-domain);
 }
 
 .filter-group-toggle {
@@ -378,8 +378,8 @@ body {
   background: var(--color-bg);
 }
 
-.agenda-list-item.game {
-  border-left: 3px solid var(--color-game);
+.agenda-list-item.domain {
+  border-left: 3px solid var(--color-domain);
 }
 
 .agenda-list-item.company-mentioned .agenda-list-star {
@@ -517,8 +517,8 @@ body {
   border-color: var(--color-primary);
 }
 
-.agenda-card.game {
-  border-left: 4px solid var(--color-game);
+.agenda-card.domain {
+  border-left: 4px solid var(--color-domain);
 }
 
 .agenda-card.company-mentioned {
@@ -549,7 +549,7 @@ body {
   text-transform: uppercase;
 }
 
-.agenda-badge.game {
+.agenda-badge.domain {
   background: #dbeafe;
   color: #1d4ed8;
 }
@@ -890,7 +890,7 @@ mark {
   flex-shrink: 0;
 }
 
-.report-badge.game {
+.report-badge.domain {
   background: #dbeafe;
   color: #1d4ed8;
 }
@@ -1271,7 +1271,7 @@ mark {
   border-color: var(--color-border);
 }
 
-[data-theme="dark"] .agenda-badge.game {
+[data-theme="dark"] .agenda-badge.domain {
   background: #1a3a4a;
   color: #5ec4e8;
 }
@@ -1339,7 +1339,7 @@ mark {
   background: #1a1d21;
 }
 
-[data-theme="dark"] .report-badge.game {
+[data-theme="dark"] .report-badge.domain {
   background: #1a3a4a;
   color: #5ec4e8;
 }
