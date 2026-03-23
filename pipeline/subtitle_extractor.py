@@ -133,7 +133,7 @@ def _try_notebooklm(video_id: str) -> tuple[str | None, str]:
 
     async def _extract():
         async with await NotebookLMClient.from_storage() as client:
-            nb = await client.notebooks.create(f"gamwatch-temp-{video_id}")
+            nb = await client.notebooks.create(f"parlawatch-temp-{video_id}")
             try:
                 url = f"https://www.youtube.com/watch?v={video_id}"
                 source = await client.sources.add_url(

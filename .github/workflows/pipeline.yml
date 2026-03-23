@@ -1,4 +1,4 @@
-name: GamWatch Pipeline
+name: ParlaWatch Pipeline
 
 on:
   schedule:

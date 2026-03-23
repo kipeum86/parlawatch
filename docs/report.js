@@ -1,5 +1,5 @@
 /**
- * GamWatch 보고서 생성기 — 안건 선택 + Slack 브리핑 양식.
+ * ParlaWatch 보고서 생성기 — 안건 선택 + Slack 브리핑 양식.
  */
 
 function openReportModal() {
