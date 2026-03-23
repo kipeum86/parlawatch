@@ -1,0 +1,79 @@
+name: GamWatch Pipeline
+
+on:
+  schedule:
+    - cron: '0 17 * * *'
+  workflow_dispatch:
+    inputs:
+      video_url:
+        description: '수동 분석할 유튜브 URL (비워두면 자동 검색)'
+        required: false
+        default: ''
+      committee:
+        description: '상임위/기관명'
+        required: false
+        default: ''
+      committee_code:
+        description: '상임위 코드 (jungmu/gwabang/munche/sanja/beopsa/bokji/etc)'
+        required: false
+        default: 'etc'
+      event_date:
+        description: '행사 일자 (YYYY-MM-DD)'
+        required: false
+        default: ''
+      subtitle_data:
+        description: '브라우저에서 추출한 자막 (gzip+base64)'
+        required: false
+        default: ''
+      event_type:
+        description: '이벤트 유형 (국정감사/업무보고/간담회/청문회 등)'
+        required: false
+        default: '국정감사'
+
+jobs:
+  process:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          cache: 'pip'
+
+      - name: Install Deno (yt-dlp JS runtime)
+        uses: denoland/setup-deno@v2
+        with:
+          deno-version: v2.x
+
+      - name: Install dependencies
+        run: |
+          pip install -r requirements.txt
+          pip install yt-dlp
+
+      - name: Write service account file
+        run: echo '${{ secrets.GOOGLE_SERVICE_ACCOUNT_JSON }}' > sa.json
+
+      - name: Run pipeline
+        env:
+          GOOGLE_APPLICATION_CREDENTIALS: sa.json
+          SPREADSHEET_ID: ${{ secrets.SPREADSHEET_ID }}
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          NAVER_CLIENT_ID: ${{ secrets.NAVER_CLIENT_ID }}
+          NAVER_CLIENT_SECRET: ${{ secrets.NAVER_CLIENT_SECRET }}
+          MANUAL_VIDEO_URL: ${{ github.event.inputs.video_url }}
+          MANUAL_COMMITTEE: ${{ github.event.inputs.committee }}
+          MANUAL_COMMITTEE_CODE: ${{ github.event.inputs.committee_code }}
+          MANUAL_EVENT_DATE: ${{ github.event.inputs.event_date }}
+          SUBTITLE_DATA: ${{ github.event.inputs.subtitle_data }}
+          MANUAL_EVENT_TYPE: ${{ github.event.inputs.event_type }}
+          NOTEBOOKLM_AUTH_JSON: ${{ secrets.NOTEBOOKLM_AUTH_JSON }}
+        run: python -m pipeline.main
+
+      - name: Cleanup credentials
+        if: always()
+        run: rm -f sa.json

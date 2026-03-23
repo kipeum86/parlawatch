@@ -1,0 +1,338 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>GamWatch — 국정감사 게임산업 모니터링</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <!-- 비밀번호 게이트 -->
+  <div id="auth-gate" class="auth-gate">
+    <div class="auth-box">
+      <h2 class="auth-title">GamWatch</h2>
+      <p class="auth-desc">접근 비밀번호를 입력하세요.</p>
+      <input type="password" id="auth-password" class="auth-input" placeholder="비밀번호" onkeydown="if(event.key==='Enter')checkAuth()">
+      <button class="btn btn-primary btn-full" onclick="checkAuth()">확인</button>
+      <p id="auth-error" class="auth-error" style="display:none;">비밀번호가 틀렸습니다.</p>
+    </div>
+  </div>
+
+  <!-- 본문 (인증 전 숨김) -->
+  <div id="app-content" style="display:none;">
+
+  <!-- 헤더 -->
+  <header class="header">
+    <div class="header-left">
+      <h1 class="header-title">GamWatch</h1>
+      <p class="header-subtitle">국정감사 게임산업 모니터링</p>
+    </div>
+    <div class="header-right">
+      <button id="btn-theme" class="btn btn-icon btn-theme" onclick="toggleTheme()" title="다크모드 전환">&#9790;</button>
+      <button id="btn-refresh" class="btn btn-icon" onclick="refreshData()" title="새로고침">&#8635;</button>
+      <button class="btn btn-icon" onclick="openSettingsModal()" title="설정">&#9881;</button>
+      <button class="btn btn-secondary" onclick="openManualModal()">영상 분석 요청</button>
+      <button id="btn-trigger" class="btn btn-primary" onclick="triggerPipeline()">
+        전체 파이프라인 실행
+      </button>
+    </div>
+  </header>
+
+  <!-- 필터바 -->
+  <div class="filter-bar">
+    <div class="filter-group">
+      <label for="filter-date">날짜</label>
+      <select id="filter-date" onchange="applyFilters()">
+        <option value="">전체</option>
+      </select>
+    </div>
+    <div class="filter-group">
+      <label for="filter-committee">상임위</label>
+      <select id="filter-committee" onchange="applyFilters()">
+        <option value="">전체</option>
+      </select>
+    </div>
+    <div class="filter-group">
+      <label for="filter-category">분류</label>
+      <select id="filter-category" onchange="applyFilters()">
+        <option value="">전체</option>
+        <option value="game">게임 관련</option>
+        <option value="general">일반</option>
+      </select>
+    </div>
+    <div class="filter-group filter-group-toggle">
+      <button id="btn-game-toggle" class="btn btn-chip" onclick="toggleGameFilter()">게임 관련만</button>
+    </div>
+    <div class="filter-group filter-search">
+      <label for="filter-search">검색</label>
+      <input type="text" id="filter-search" placeholder="키워드 검색..." oninput="applyFilters()">
+    </div>
+    <div class="filter-group">
+      <button class="btn btn-secondary" onclick="openReportModal()">보고서 생성</button>
+    </div>
+    <div class="filter-group">
+      <button class="btn btn-secondary btn-sm" onclick="resetFilters()">초기화</button>
+    </div>
+  </div>
+
+  <!-- 통계 요약 바 -->
+  <div id="stats-bar" class="stats-bar" style="display:none;">
+    <span id="stats-total">전체 0건</span>
+    <span class="stats-divider">|</span>
+    <span id="stats-game">게임 관련 0건</span>
+    <span class="stats-divider">|</span>
+    <span id="stats-company">게임사 언급 0건</span>
+  </div>
+
+  <!-- 정보 칩 -->
+  <div id="info-chips" class="info-chips" style="display:none;">
+    <button class="info-chip" id="chip-videos" onclick="openInfoModal('videos')">
+      <span class="info-chip-icon">&#9654;</span>
+      <span id="chip-videos-label">영상 0건 처리</span>
+    </button>
+    <button class="info-chip" id="chip-keywords" onclick="openInfoModal('keywords')">
+      <span class="info-chip-icon">&#128270;</span>
+      <span id="chip-keywords-label">키워드 0개</span>
+    </button>
+  </div>
+
+  <!-- 정보 모달: 처리된 영상 -->
+  <div id="modal-videos" class="modal" style="display:none;">
+    <div class="modal-content modal-medium">
+      <div class="modal-header">
+        <h2>처리된 영상 목록</h2>
+        <button class="modal-close" onclick="closeInfoModal('videos')">&times;</button>
+      </div>
+      <div class="modal-body" id="modal-videos-body"></div>
+    </div>
+  </div>
+
+  <!-- 정보 모달: 키워드 -->
+  <div id="modal-keywords" class="modal" style="display:none;">
+    <div class="modal-content modal-medium">
+      <div class="modal-header">
+        <h2>모니터링 키워드</h2>
+        <button class="modal-close" onclick="closeInfoModal('keywords')">&times;</button>
+      </div>
+      <div class="modal-body" id="modal-keywords-body"></div>
+    </div>
+  </div>
+
+  <!-- 파이프라인 상태 바 -->
+  <div id="pipeline-status" class="pipeline-status" style="display:none;">
+    <div class="pipeline-status-inner">
+      <span id="pipeline-status-icon" class="pipeline-icon">&#9696;</span>
+      <span id="pipeline-status-text">파이프라인 실행 중...</span>
+      <span id="pipeline-status-time" class="pipeline-time"></span>
+      <a id="pipeline-status-link" class="pipeline-link" href="#" target="_blank" rel="noopener">Actions에서 보기</a>
+    </div>
+    <div class="pipeline-progress">
+      <div id="pipeline-progress-bar" class="pipeline-progress-bar"></div>
+    </div>
+  </div>
+
+  <!-- 메인 콘텐츠 -->
+  <main id="main-content" class="main-content">
+    <div id="loading" class="loading">데이터를 불러오는 중...</div>
+    <div id="empty-state" class="empty-state" style="display:none;">
+      <p>데이터가 없습니다.</p>
+      <p>파이프라인을 실행하거나 잠시 후 다시 확인해 주세요.</p>
+    </div>
+    <div id="agenda-toolbar" class="agenda-toolbar" style="display:none;">
+      <div class="view-toggle">
+        <button id="btn-view-card" class="btn btn-sm btn-view active" onclick="setViewMode('card')" title="카드 뷰">&#9638;</button>
+        <button id="btn-view-list" class="btn btn-sm btn-view" onclick="setViewMode('list')" title="리스트 뷰">&#9776;</button>
+      </div>
+      <button id="btn-toggle-all" class="btn btn-sm btn-secondary" onclick="toggleAllDetails()">모두 펼치기</button>
+    </div>
+    <div id="agenda-list" class="agenda-list"></div>
+    <button id="btn-load-more" class="btn btn-load-more" onclick="loadMore()" style="display:none;">더보기</button>
+  </main>
+
+  <!-- 마지막 업데이트 -->
+  <footer class="footer">
+    <span id="last-updated"></span>
+  </footer>
+
+  <!-- 보고서 모달 -->
+  <div id="report-modal" class="modal" style="display:none;">
+    <div class="modal-content modal-large">
+      <div class="modal-header">
+        <h2>Slack 보고서 생성</h2>
+        <button class="modal-close" onclick="closeReportModal()">&times;</button>
+      </div>
+      <div class="modal-body">
+        <!-- 1단계: 필터 -->
+        <div class="report-options">
+          <div class="filter-group">
+            <label for="report-date">날짜</label>
+            <select id="report-date" onchange="loadReportAgendas()"></select>
+          </div>
+          <div class="filter-group">
+            <label for="report-category">분류</label>
+            <select id="report-category" onchange="loadReportAgendas()">
+              <option value="all">전체 안건</option>
+              <option value="game">게임 관련만</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- 2단계: 안건 선택 -->
+        <div id="report-agenda-list" class="report-agenda-list"></div>
+        <div class="report-agenda-actions" id="report-agenda-actions" style="display:none;">
+          <button class="btn btn-sm btn-secondary" onclick="toggleReportCheckAll()">전체 선택/해제</button>
+          <button class="btn btn-primary" onclick="generateReport()">선택한 안건으로 보고서 생성</button>
+        </div>
+
+        <!-- 3단계: 미리보기 -->
+        <div id="report-preview" class="report-preview" style="display:none;">
+          <pre id="report-text"></pre>
+          <div class="report-preview-actions">
+            <button class="btn btn-primary" onclick="copyReport()">클립보드 복사</button>
+            <span id="copy-feedback" class="copy-feedback"></span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 수동 영상 분석 모달 -->
+  <div id="manual-modal" class="modal" style="display:none;">
+    <div class="modal-content modal-medium">
+      <div class="modal-header">
+        <h2>영상 분석 요청</h2>
+        <button class="modal-close" onclick="closeManualModal()">&times;</button>
+      </div>
+      <div class="modal-body">
+        <p class="modal-description">유튜브 영상 URL만 입력하면 서버에서 자막을 자동 추출하여 AI가 분석합니다. 자막 추출이 잘 안 되는 경우에만 직접 붙여넣으세요.</p>
+        <div class="form-group">
+          <label for="manual-url">유튜브 URL *</label>
+          <input type="text" id="manual-url" placeholder="https://www.youtube.com/watch?v=...">
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label for="manual-event-type">이벤트 유형</label>
+            <input type="text" id="manual-event-type" list="event-type-list" placeholder="국정감사" value="국정감사">
+            <datalist id="event-type-list">
+              <option value="국정감사">
+              <option value="업무보고">
+              <option value="간담회">
+              <option value="청문회">
+              <option value="토론회">
+              <option value="세미나">
+            </datalist>
+          </div>
+          <div class="form-group">
+            <label for="manual-date">행사 일자</label>
+            <input type="date" id="manual-date">
+          </div>
+        </div>
+        <div class="form-group">
+          <label for="manual-committee">상임위/기관명</label>
+          <input type="text" id="manual-committee" list="committee-list" placeholder="예: 문화체육관광위원회, 문체부, 청와대 등">
+          <datalist id="committee-list">
+            <option value="정무위원회">
+            <option value="과학기술정보방송통신위원회">
+            <option value="문화체육관광위원회">
+            <option value="산업통상자원중소벤처기업위원회">
+            <option value="법제사법위원회">
+            <option value="보건복지위원회">
+            <option value="기획재정위원회">
+            <option value="기후에너지환경노동위원회">
+            <option value="문화체육관광부">
+            <option value="과학기술정보통신부">
+          </datalist>
+        </div>
+
+        <div id="manual-subtitle-status" class="subtitle-status" style="display:none;"></div>
+
+        <!-- 자막 수동 입력 (접힘) -->
+        <details class="transcript-guide" id="transcript-guide">
+          <summary class="transcript-guide-toggle">자막 직접 붙여넣기 (선택사항)</summary>
+          <div class="transcript-guide-body">
+            <p class="manual-subtitle-hint">서버 자동 추출이 실패할 경우, YouTube에서 직접 자막을 복사하여 붙여넣을 수 있습니다.</p>
+            <div class="form-group" style="margin-bottom:8px;">
+              <textarea id="manual-subtitle" rows="6" placeholder="YouTube 영상 → 더보기 → 스크립트 보기 → 전체 선택(Ctrl+A) → 복사(Ctrl+C) → 여기에 붙여넣기(Ctrl+V)"></textarea>
+              <p class="form-hint" id="manual-char-count"></p>
+            </div>
+          </div>
+        </details>
+
+        <button id="btn-manual-submit" class="btn btn-primary btn-full" onclick="submitManualVideo()">분석 요청</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 설정 모달 -->
+  <div id="settings-modal" class="modal" style="display:none;">
+    <div class="modal-content modal-small">
+      <div class="modal-header">
+        <h2>설정</h2>
+        <button class="modal-close" onclick="closeSettingsModal()">&times;</button>
+      </div>
+      <div class="modal-body">
+        <p class="modal-description">파이프라인 실행에 필요한 GitHub Personal Access Token을 입력하세요. 브라우저에 저장되며 외부로 전송되지 않습니다.</p>
+        <div class="form-group">
+          <label for="settings-pat">GitHub PAT (workflow scope)</label>
+          <input type="password" id="settings-pat" placeholder="ghp_...">
+        </div>
+        <button class="btn btn-primary btn-full" onclick="saveSettings()">저장</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 파이프라인 실행 확인 모달 -->
+  <div id="confirm-modal" class="modal" style="display:none;">
+    <div class="modal-content modal-small">
+      <div class="modal-header">
+        <h2>파이프라인 실행 확인</h2>
+        <button class="modal-close" onclick="cancelPipeline()">&times;</button>
+      </div>
+      <div class="modal-body">
+        <p class="confirm-description">전체 파이프라인을 실행하면 다음 작업이 수행됩니다:</p>
+        <ul class="confirm-list">
+          <li>대상 상임위 국회 영상을 자동으로 검색</li>
+          <li>자막 추출 후 AI가 게임 산업 관련 내용 분석</li>
+          <li>분석 결과를 Google Sheets에 저장</li>
+        </ul>
+        <p class="confirm-note">GitHub Actions 워크플로우가 실행되며, 완료까지 수 분이 소요될 수 있습니다.</p>
+        <div class="confirm-actions">
+          <button class="btn btn-secondary" onclick="cancelPipeline()">취소</button>
+          <button class="btn btn-primary" onclick="confirmPipeline()">실행</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 맨 위로 버튼 -->
+  <button id="btn-scroll-top" class="btn-scroll-top" onclick="scrollToTop()" title="맨 위로">&#9650;</button>
+
+  <!-- 알림 -->
+  <div id="notification" class="notification" style="display:none;"></div>
+
+  </div><!-- /app-content -->
+
+  <script>
+    const AUTH_HASH = '5e884898da28047151d0e56f8dc6292773603d0d6aabbdd62a11ef721d1542d8'; // sha256('260320') - NOT actual check, see below
+    function checkAuth() {
+      const pw = document.getElementById('auth-password').value;
+      if (pw === '260320') {
+        localStorage.setItem('gamwatch_auth', 'ok');
+        document.getElementById('auth-gate').style.display = 'none';
+        document.getElementById('app-content').style.display = '';
+      } else {
+        document.getElementById('auth-error').style.display = 'block';
+      }
+    }
+    // 이미 인증된 경우 게이트 숨김 + 본문 표시
+    if (localStorage.getItem('gamwatch_auth') === 'ok') {
+      document.getElementById('auth-gate').style.display = 'none';
+      document.getElementById('app-content').style.display = '';
+    }
+  </script>
+  <script src="config.js"></script>
+  <script src="app.js"></script>
+  <script src="report.js"></script>
+  <script src="trigger.js"></script>
+</body>
+</html>
