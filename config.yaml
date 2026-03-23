@@ -2,68 +2,44 @@
 
 # LLM Provider Settings
 llm:
-  provider: "claude"          # claude / openai / gemini / onpremise
+  provider: "claude"
   model: "claude-haiku-4-5-20251001"
   max_tokens: 16384
 
 # Google Sheets
 sheets:
-  spreadsheet_id: "1IG3GWc4kChVmjYxsPw_NX3gUlKj_ehOFgOMh3RqJPRY"
+  spreadsheet_id: ""
 
-# YouTube Channels - 국회방송
+# YouTube Channels
 youtube:
   channels:
-    - id: ""                  # 국회방송 채널 ID (OQ2: 확인 필요)
+    - id: "UCyYl7eNQ-JXtFnFMJFGZaOQ"
       name: "국회방송"
 
-# Target Committees (상임위)
-committees:
-  - code: "jungmu"
-    name: "정무위원회"
-    search_terms: ["정무위", "정무위원회"]
-  - code: "gwabang"
-    name: "과학기술정보방송통신위원회"
-    search_terms: ["과방위", "과학기술정보방송통신위원회"]
-  - code: "munche"
-    name: "문화체육관광위원회"
-    search_terms: ["문체위", "문화체육관광위원회"]
-  - code: "sanja"
-    name: "산업통상자원중소벤처기업위원회"
-    search_terms: ["산자위", "산업통상자원중소벤처기업위원회"]
-  - code: "beopsa"
-    name: "법제사법위원회"
-    search_terms: ["법사위", "법제사법위원회"]
-  - code: "bokji"
-    name: "보건복지위원회"
-    search_terms: ["복지위", "보건복지위원회"]
+# 도메인 설정
+domain:
+  name: ""
+  description: ""
 
-# Company names for highlight detection (주요 게임사)
-company_names:
-  - "넥슨"
-  - "엔씨소프트"
-  - "넷마블"
-  - "크래프톤"
-  - "카카오게임즈"
-  - "스마일게이트"
-  - "컴투스"
-  - "위메이드"
-  - "펄어비스"
-  - "네오위즈"
-  - "NHN"
-  - "슈퍼셀"
-  - "웹젠"
-  - "시프트업"
-  - "라이엇게임즈"
-  - "블리자드"
+# 모니터링 대상 상임위원회
+committees: []
 
-# 국정감사 기간 (이 기간에만 자동 실행, 수동 실행은 항상 가능)
+# 모니터링 대상 기업/기관명
+entity_names: []
+
+# 키워드 필터
+keywords:
+  include: []
+  exclude: []
+
+# 모니터링 기간
 audit_period:
-  start: "2025-10-01"
-  end: "2025-10-31"
+  start: ""
+  end: ""
 
 # Pipeline Settings
 pipeline:
   retry_count: 3
   retry_delay_seconds: 5
   news_results_per_agenda: 5
-  search_days_back: 7        # 영상 검색 범위 (일)
+  search_days_back: 7
