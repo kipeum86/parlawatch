@@ -117,10 +117,6 @@ def _extract_publisher(url: str) -> str:
             "sedaily.com": "서울경제",
             "yna.co.kr": "연합뉴스",
             "ytn.co.kr": "YTN",
-            "inven.co.kr": "인벤",
-            "gamemeca.com": "게임메카",
-            "thisisgame.com": "디스이즈게임",
-            "gamevu.co.kr": "게임뷰",
         }
         for key, name in publisher_map.items():
             if key in domain:
