@@ -51,8 +51,8 @@ function loadReportAgendas() {
   if (!date) return;
 
   let agendas = dataModel.filter(a => a.date === date);
-  if (categoryFilter === 'game') {
-    agendas = agendas.filter(a => a.category === 'game');
+  if (categoryFilter === 'domain') {
+    agendas = agendas.filter(a => a.category === 'domain');
   }
 
   if (agendas.length === 0) {
@@ -60,7 +60,7 @@ function loadReportAgendas() {
     return;
   }
 
-  // 상임위별 그룹핑 + 그룹 내 정렬 (게임+★ > 게임 > 일반)
+  // 상임위별 그룹핑 + 그룹 내 정렬 (관심분야+★ > 관심분야 > 일반)
   const byCommittee = {};
   agendas.forEach(a => {
     if (!byCommittee[a.committee]) byCommittee[a.committee] = [];
@@ -68,7 +68,7 @@ function loadReportAgendas() {
   });
   for (const items of Object.values(byCommittee)) {
     items.sort((a, b) => {
-      const score = x => (x.category === 'game' ? 2 : 0) + (x.is_company_mentioned === 'TRUE' ? 1 : 0);
+      const score = x => (x.category === 'domain' ? 2 : 0) + (x.is_company_mentioned === 'TRUE' ? 1 : 0);
       return score(b) - score(a);
     });
   }
@@ -78,7 +78,7 @@ function loadReportAgendas() {
     html += `<div class="report-comm-group">`;
     html += `<div class="report-comm-header">${comm}</div>`;
     items.forEach(a => {
-      const badge = a.category === 'game' ? '<span class="report-badge game">게임</span>' : '';
+      const badge = a.category === 'domain' ? '<span class="report-badge domain">관심</span>' : '';
       const star = a.isCompanyMentioned ? '<span class="report-badge company">★</span>' : '';
       html += `<label class="report-agenda-item">`;
       html += `<input type="checkbox" value="${a.agenda_id}" checked>`;
@@ -148,7 +148,7 @@ function formatReport(date, agendas) {
   const eventTypes = [...new Set(agendas.map(a => a.event_type || '국정감사'))];
   const isAllAudit = eventTypes.length === 1 && eventTypes[0] === '국정감사';
   const eventLabel = isAllAudit ? '국정감사' : eventTypes.join('·');
-  report += `안녕하세요. ${dateLabel} 진행된 주요 ${eventLabel} 내용(게임 및 IT 관련) 정리하여 안내드립니다.\n\n`;
+  report += `안녕하세요. ${dateLabel} 진행된 주요 ${eventLabel} 내용 정리하여 안내드립니다.\n\n`;
 
   // ── 2. 상임위별 요약 ──
   for (const [comm, items] of byCommittee) {
@@ -183,7 +183,7 @@ function formatReport(date, agendas) {
         report += ` - ${agenda.summary}\n`;
       }
 
-      // 게임사 언급 상세
+      // 기관 언급 상세
       if (agenda.isCompanyMentioned && agenda.company_mention_detail) {
         report += `  ※ ${agenda.company_mention_detail}\n`;
       }
