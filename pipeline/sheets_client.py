@@ -36,7 +36,7 @@ HEADERS = {
     ],
     TAB_AGENDAS: [
         "agenda_id", "video_id", "committee", "date", "category",
-        "title", "summary", "is_company_mentioned", "company_mention_detail", "sort_order",
+        "title", "summary", "is_entity_mentioned", "entity_mention_detail", "sort_order",
         "event_type",
     ],
     TAB_STATEMENTS: [
