@@ -84,7 +84,13 @@ def main():
         sys.exit(1)
 
     llm = create_llm_client(config, anthropic_key)
-    company_names = config.get("company_names", [])
+
+    entity_names = config.get("entity_names", [])
+    domain = config.get("domain", {})
+    domain_name = domain.get("name", "")
+    domain_description = domain.get("description", "")
+    config_include = config.get("keywords", {}).get("include", [])
+    config_exclude = config.get("keywords", {}).get("exclude", [])
 
     # 키워드 (dry-run에서는 Sheets 없이 기본 키워드만 사용)
     user_include, user_exclude = [], []
@@ -96,10 +102,10 @@ def main():
         sheets = SheetsClient(sa_file, spreadsheet_id)
         user_include, user_exclude = sheets.get_user_keywords()
 
-    include_kw, exclude_kw = merge_keywords(user_include, user_exclude)
+    include_kw, exclude_kw = merge_keywords(config_include, config_exclude, user_include, user_exclude)
 
     logger.info("LLM 분석 시작...")
-    agendas = process_text(subtitle_text, llm, company_names, include_kw, exclude_kw)
+    agendas = process_text(subtitle_text, llm, domain_name, domain_description, entity_names, include_kw, exclude_kw)
 
     # ── 3. 결과 출력 ──
     result = {
@@ -111,19 +117,19 @@ def main():
 
     print("\n" + "=" * 60)
     print(f"분석 완료: {len(agendas)}개 안건")
-    game_count = sum(1 for a in agendas if a.get("category") == "game")
-    print(f"  게임 관련: {game_count}개")
-    print(f"  일반: {len(agendas) - game_count}개")
+    domain_count = sum(1 for a in agendas if a.get("category") == "domain")
+    print(f"  관심 분야: {domain_count}개")
+    print(f"  일반: {len(agendas) - domain_count}개")
     print("=" * 60)
 
     for i, agenda in enumerate(agendas):
-        tag = "[게임]" if agenda.get("category") == "game" else "[일반]"
-        company = " ★게임사언급" if agenda.get("is_company_mentioned") else ""
-        print(f"\n{i+1}. {tag}{company} {agenda.get('title', '')}")
+        tag = "[관심]" if agenda.get("category") == "domain" else "[일반]"
+        entity = " ★기관언급" if agenda.get("is_entity_mentioned") else ""
+        print(f"\n{i+1}. {tag}{entity} {agenda.get('title', '')}")
         print(f"   {agenda.get('summary', '')}")
 
-        if agenda.get("is_company_mentioned") and agenda.get("company_mention_detail"):
-            print(f"   ※ {agenda['company_mention_detail']}")
+        if agenda.get("is_entity_mentioned") and agenda.get("entity_mention_detail"):
+            print(f"   ※ {agenda['entity_mention_detail']}")
 
         for s in agenda.get("statements", []):
             role = "질의" if s.get("speaker_role") == "questioner" else "답변"
@@ -176,9 +182,10 @@ def _write_to_sheets(sheets, video_id, args, subtitle_source, agendas, date):
             "category": agenda.get("category", "general"),
             "title": agenda.get("title", ""),
             "summary": agenda.get("summary", ""),
-            "is_company_mentioned": str(agenda.get("is_company_mentioned", False)).upper(),
-            "company_mention_detail": agenda.get("company_mention_detail", ""),
+            "is_entity_mentioned": str(agenda.get("is_entity_mentioned", False)).upper(),
+            "entity_mention_detail": agenda.get("entity_mention_detail", ""),
             "sort_order": str(i + 1),
+            "event_type": "국정감사",
         })
         for j, stmt in enumerate(agenda.get("statements", [])):
             statement_records.append({
