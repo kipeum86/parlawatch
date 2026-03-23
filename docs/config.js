@@ -1,5 +1,5 @@
 /**
- * GamWatch 대시보드 설정.
+ * ParlaWatch 대시보드 설정.
  * GH_PAT은 보안상 코드에 포함하지 않고, 브라우저 localStorage에서 관리합니다.
  * 첫 접속 시 설정 모달에서 입력하면 됩니다.
  */
@@ -10,15 +10,15 @@ const CONFIG = {
 
   // GitHub Actions 트리거
   GH_OWNER: 'kipeum86',
-  GH_REPO: 'gamwatch-national-audit-monitoring',
+  GH_REPO: 'parlawatch',
   GH_WORKFLOW_ID: 'pipeline.yml',
 
   // GH_PAT은 localStorage에서 로드
   get GH_PAT() {
-    return localStorage.getItem('gamwatch_gh_pat') || '';
+    return localStorage.getItem('parlawatch_gh_pat') || '';
   },
   set GH_PAT(val) {
-    localStorage.setItem('gamwatch_gh_pat', val);
+    localStorage.setItem('parlawatch_gh_pat', val);
   },
 
   // Sheets 탭 이름

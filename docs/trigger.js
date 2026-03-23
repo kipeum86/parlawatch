@@ -1,5 +1,5 @@
 /**
- * GamWatch 파이프라인 트리거 + 상태 모니터링 + 설정 + 자막 추출.
+ * ParlaWatch 파이프라인 트리거 + 상태 모니터링 + 설정 + 자막 추출.
  */
 
 let _pollTimer = null;

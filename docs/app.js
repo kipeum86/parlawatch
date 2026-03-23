@@ -1,10 +1,10 @@
 /**
- * GamWatch 대시보드 — 데이터 fetch, 렌더링, 필터, 검색.
+ * ParlaWatch 대시보드 — 데이터 fetch, 렌더링, 필터, 검색.
  */
 
 // ── 다크모드 ──
 function initTheme() {
-  const saved = localStorage.getItem('gamwatch_theme');
+  const saved = localStorage.getItem('parlawatch_theme');
   if (saved === 'dark' || (!saved && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
     document.documentElement.setAttribute('data-theme', 'dark');
   }
@@ -15,10 +15,10 @@ function toggleTheme() {
   const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
   if (isDark) {
     document.documentElement.removeAttribute('data-theme');
-    localStorage.setItem('gamwatch_theme', 'light');
+    localStorage.setItem('parlawatch_theme', 'light');
   } else {
     document.documentElement.setAttribute('data-theme', 'dark');
-    localStorage.setItem('gamwatch_theme', 'dark');
+    localStorage.setItem('parlawatch_theme', 'dark');
   }
   updateThemeIcon();
 }
@@ -45,7 +45,7 @@ const LOAD_MORE_SIZE = 10;
 let _currentFiltered = [];
 let _currentSearch = '';
 let _visibleGroups = 0;
-let _viewMode = localStorage.getItem('gamwatch_view') || 'card';
+let _viewMode = localStorage.getItem('parlawatch_view') || 'card';
 
 // 기본 키워드 (pipeline/config.py 미러링)
 const DEFAULT_INCLUDE_KEYWORDS = [
@@ -437,7 +437,7 @@ function renderAgendaListItem(agenda, searchTerm) {
 
 function setViewMode(mode) {
   _viewMode = mode;
-  localStorage.setItem('gamwatch_view', mode);
+  localStorage.setItem('parlawatch_view', mode);
   applyFilters();
 }
 

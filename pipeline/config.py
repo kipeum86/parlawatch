@@ -1,4 +1,4 @@
-"""GamWatch 파이프라인 상수 및 기본 키워드 정의."""
+"""ParlaWatch 파이프라인 상수 및 기본 키워드 정의."""
 
 import os
 from pathlib import Path

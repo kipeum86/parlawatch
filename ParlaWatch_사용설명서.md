@@ -1,6 +1,6 @@
-# GamWatch 사용설명서
+# ParlaWatch 사용설명서
 
-## GamWatch란?
+## ParlaWatch란?
 
 국정감사 기간 중 게임 산업 관련 발언을 **자동으로** 모니터링하는 시스템입니다.
 
@@ -13,7 +13,7 @@
 
 ## 1. 접속 방법
 
-https://kipeum86.github.io/gamwatch-national-audit-monitoring/
+https://kipeum86.github.io/parlawatch/
 
 처음 접속하면 **비밀번호 입력 화면**이 나타납니다.
 전달받은 비밀번호를 입력하고 **확인**을 누르면 대시보드가 열립니다.

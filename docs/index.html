@@ -3,14 +3,14 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>GamWatch — 국정감사 게임산업 모니터링</title>
+  <title>ParlaWatch — 국정감사 게임산업 모니터링</title>
   <link rel="stylesheet" href="styles.css">
 </head>
 <body>
   <!-- 비밀번호 게이트 -->
   <div id="auth-gate" class="auth-gate">
     <div class="auth-box">
-      <h2 class="auth-title">GamWatch</h2>
+      <h2 class="auth-title">ParlaWatch</h2>
       <p class="auth-desc">접근 비밀번호를 입력하세요.</p>
       <input type="password" id="auth-password" class="auth-input" placeholder="비밀번호" onkeydown="if(event.key==='Enter')checkAuth()">
       <button class="btn btn-primary btn-full" onclick="checkAuth()">확인</button>
@@ -24,7 +24,7 @@
   <!-- 헤더 -->
   <header class="header">
     <div class="header-left">
-      <h1 class="header-title">GamWatch</h1>
+      <h1 class="header-title">ParlaWatch</h1>
       <p class="header-subtitle">국정감사 게임산업 모니터링</p>
     </div>
     <div class="header-right">
@@ -317,7 +317,7 @@
     function checkAuth() {
       const pw = document.getElementById('auth-password').value;
       if (pw === '260320') {
-        localStorage.setItem('gamwatch_auth', 'ok');
+        localStorage.setItem('parlawatch_auth', 'ok');
         document.getElementById('auth-gate').style.display = 'none';
         document.getElementById('app-content').style.display = '';
       } else {
@@ -325,7 +325,7 @@
       }
     }
     // 이미 인증된 경우 게이트 숨김 + 본문 표시
-    if (localStorage.getItem('gamwatch_auth') === 'ok') {
+    if (localStorage.getItem('parlawatch_auth') === 'ok') {
       document.getElementById('auth-gate').style.display = 'none';
       document.getElementById('app-content').style.display = '';
     }

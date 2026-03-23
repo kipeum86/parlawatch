@@ -1,4 +1,4 @@
-"""GamWatch CLI — 수동으로 영상 하나를 분석하는 간편 도구.
+"""ParlaWatch CLI — 수동으로 영상 하나를 분석하는 간편 도구.
 
 사용법:
   # 영상 분석 → Sheets 기록
@@ -34,7 +34,7 @@ logger = logging.getLogger(__name__)
 
 
 def main():
-    parser = argparse.ArgumentParser(description="GamWatch — 영상 수동 분석")
+    parser = argparse.ArgumentParser(description="ParlaWatch — 영상 수동 분석")
     parser.add_argument("url", help="유튜브 영상 URL 또는 video ID")
     parser.add_argument("--committee", default="", help="상임위/기관명 (예: 문체위)")
     parser.add_argument("--committee-code", default="etc", help="상임위 코드 (예: munche)")

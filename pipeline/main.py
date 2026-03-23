@@ -1,4 +1,4 @@
-"""GamWatch 파이프라인 메인 오케스트레이터.
+"""ParlaWatch 파이프라인 메인 오케스트레이터.
 
 실행: python -m pipeline.main
 """
@@ -46,7 +46,7 @@ def _is_in_audit_period(config: dict) -> bool:
 
 def run_pipeline():
     """전체 파이프라인을 실행한다."""
-    logger.info("=== GamWatch 파이프라인 시작 ===")
+    logger.info("=== ParlaWatch 파이프라인 시작 ===")
 
     # ── 설정 로드 ──
     config = load_config()
@@ -88,7 +88,7 @@ def run_pipeline():
         logger.info("국정감사 기간 외 — 자동 실행 스킵 (기간: %s ~ %s)",
                      config.get("audit_period", {}).get("start", "미설정"),
                      config.get("audit_period", {}).get("end", "미설정"))
-        logger.info("=== GamWatch 파이프라인 종료 ===")
+        logger.info("=== ParlaWatch 파이프라인 종료 ===")
         return
 
     # 수동 입력 영상이 있으면 해당 영상만 처리
@@ -118,7 +118,7 @@ def run_pipeline():
 
     if not videos:
         logger.info("처리할 신규 영상이 없습니다.")
-        logger.info("=== GamWatch 파이프라인 종료 ===")
+        logger.info("=== ParlaWatch 파이프라인 종료 ===")
         return
 
     logger.info("처리할 영상: %d개", len(videos))
@@ -202,7 +202,7 @@ def run_pipeline():
             if video.source == "manual":
                 sheets.update_manual_queue_status(video.url, "error")
 
-    logger.info("=== GamWatch 파이프라인 종료: 성공 %d, 실패 %d ===", success_count, error_count)
+    logger.info("=== ParlaWatch 파이프라인 종료: 성공 %d, 실패 %d ===", success_count, error_count)
 
 
 def _write_results(sheets: SheetsClient, video, subtitle_source: str, agendas_raw: list[dict]):

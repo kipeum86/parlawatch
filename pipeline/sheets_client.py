@@ -160,7 +160,7 @@ class SheetsClient:
         for sheet in meta.get("sheets", []):
             for pr in sheet.get("protectedRanges", []):
                 desc = pr.get("description", "")
-                if desc.startswith("gamwatch-header-"):
+                if desc.startswith("parlawatch-header-"):
                     existing_protections.add(desc)
 
         requests = []
@@ -169,7 +169,7 @@ class SheetsClient:
             if not sheet_info:
                 continue
 
-            protection_id = f"gamwatch-header-{tab_name}"
+            protection_id = f"parlawatch-header-{tab_name}"
             if protection_id in existing_protections:
                 continue
 
