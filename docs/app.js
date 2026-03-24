@@ -112,6 +112,12 @@ function _showSkeletonLoading() {
 // ──────────────────────────────────────────────
 
 async function loadAllData() {
+  // 데모 모드: SPREADSHEET_ID가 비어있으면 mock data 사용
+  if (!CONFIG.SPREADSHEET_ID) {
+    _loadDemoData();
+    return;
+  }
+
   const [agendas, statements, news] = await Promise.all([
     fetchSheetData(CONFIG.TABS.AGENDAS),
     fetchSheetData(CONFIG.TABS.STATEMENTS),
@@ -128,6 +134,70 @@ async function loadAllData() {
   ]);
   allProcessedVideos = videosResult.status === 'fulfilled' ? videosResult.value : [];
   allUserKeywords = keywordsResult.status === 'fulfilled' ? keywordsResult.value : [];
+}
+
+function _loadDemoData() {
+  allAgendas = [
+    { agenda_id: '20261023_bokji_001', video_id: 'demo_v1', committee: '보건복지위원회', date: '2026-10-23', category: 'domain', title: '의약품 허가·심사 절차 개선 방안', summary: '식약처의 의약품 허가 심사 기간이 주요국 대비 2배 이상 소요되는 문제를 지적하며, 바이오시밀러 패스트트랙 도입과 심사 인력 확충 방안을 논의하였다. 셀트리온의 자가면역질환 치료제 심사 지연 사례가 집중 거론되었다.', is_company_mentioned: 'TRUE', company_mention_detail: '셀트리온 — 자가면역질환 바이오시밀러 품목 허가가 14개월째 지연 중이며, 동일 제품이 FDA에서는 10개월 만에 승인된 사례가 지적됨', sort_order: '1', event_type: '국정감사' },
+    { agenda_id: '20261023_bokji_002', video_id: 'demo_v1', committee: '보건복지위원회', date: '2026-10-23', category: 'domain', title: '건강보험 보장성 강화 및 재정 안정화', summary: '건강보험 보장률이 65%대에 정체된 상황에서 비급여 항목의 급여화 로드맵과 건강보험 재정 건전성 확보 방안을 동시에 논의하였다. 특히 고가 항암제 급여 확대와 재정 영향 분석이 주요 쟁점이었다.', is_company_mentioned: 'FALSE', company_mention_detail: '', sort_order: '2', event_type: '국정감사' },
+    { agenda_id: '20261023_bokji_003', video_id: 'demo_v1', committee: '보건복지위원회', date: '2026-10-23', category: 'domain', title: '디지털 헬스케어 산업 육성 정책', summary: 'AI 기반 의료기기 인허가 현황과 디지털 치료제 제도화 방안을 점검하였다. 삼성바이오로직스의 AI 신약개발 플랫폼 투자 계획이 언급되었으며, 개인정보 보호와 의료 데이터 활용 간 균형 문제가 논의되었다.', is_company_mentioned: 'TRUE', company_mention_detail: '삼성바이오로직스 — AI 기반 신약개발 플랫폼에 3,000억원 투자 계획 발표, 정부 R&D 지원 연계 방안 논의', sort_order: '3', event_type: '국정감사' },
+    { agenda_id: '20261023_bokji_004', video_id: 'demo_v1', committee: '보건복지위원회', date: '2026-10-23', category: 'general', title: '저출산 대응 양육 지원 확대 방안', summary: '육아휴직 급여 인상, 아동수당 확대, 공공 보육시설 확충 등 저출산 대응 정책의 실효성을 점검하였다. 합계출산율 0.7명대의 위기 상황에서 보다 과감한 재정 투입 필요성이 강조되었다.', is_company_mentioned: 'FALSE', company_mention_detail: '', sort_order: '4', event_type: '국정감사' },
+    { agenda_id: '20261021_bokji_001', video_id: 'demo_v2', committee: '보건복지위원회', date: '2026-10-21', category: 'domain', title: '바이오의약품 산업 지원 및 규제 합리화', summary: '국내 바이오의약품 산업의 글로벌 경쟁력 강화를 위한 규제 혁신 방안을 논의하였다. 한미약품의 기술수출 성과와 국내 바이오 CDMO 역량 확대 필요성이 거론되었다.', is_company_mentioned: 'TRUE', company_mention_detail: '한미약품 — 비만 치료제 기술수출 계약(8조원) 체결 성과 언급, 국내 임상 인프라 확대 필요성 논의', sort_order: '1', event_type: '국정감사' },
+    { agenda_id: '20261021_bokji_002', video_id: 'demo_v2', committee: '보건복지위원회', date: '2026-10-21', category: 'domain', title: '의료 인력 수급 불균형 해소 대책', summary: '지방 의료기관의 의사 부족 문제와 전공의 수련환경 개선 방안을 논의하였다. 필수의료 분야 보상 체계 개편과 의대 정원 조정의 필요성이 주요 쟁점이었다.', is_company_mentioned: 'FALSE', company_mention_detail: '', sort_order: '2', event_type: '국정감사' },
+    { agenda_id: '20261021_bokji_003', video_id: 'demo_v2', committee: '보건복지위원회', date: '2026-10-21', category: 'general', title: '국가 감염병 대응 체계 개선 방안', summary: '코로나19 이후 질병관리청의 감염병 대응 역량 강화 현황을 점검하고, 신종 감염병 조기 경보 시스템과 백신 자급률 향상 방안을 논의하였다.', is_company_mentioned: 'FALSE', company_mention_detail: '', sort_order: '3', event_type: '국정감사' },
+    { agenda_id: '20261025_gihoek_001', video_id: 'demo_v3', committee: '기획재정위원회', date: '2026-10-25', category: 'domain', title: '2027년도 보건복지부 예산안 심사', summary: '보건복지부 소관 예산 107조원에 대한 심사를 진행하였다. 건강보험 국고지원금 확대, 바이오헬스 R&D 예산 증액, 필수의료 지원 특별회계 신설 등이 핵심 쟁점이었다.', is_company_mentioned: 'FALSE', company_mention_detail: '', sort_order: '1', event_type: '예산심사' },
+  ];
+
+  allStatements = [
+    { statement_id: '20261023_bokji_001_s001', agenda_id: '20261023_bokji_001', speaker_name: '김민석', speaker_party: '더불어민주당', speaker_role: 'questioner', content: '식약처장, 셀트리온의 자가면역질환 바이오시밀러 품목허가가 14개월째 지연되고 있습니다. 동일 제품이 미국 FDA에서는 10개월 만에 승인됐는데, 우리 식약처는 왜 이렇게 느린 겁니까?', sort_order: '1' },
+    { statement_id: '20261023_bokji_001_s002', agenda_id: '20261023_bokji_001', speaker_name: '오유경', speaker_party: '', speaker_role: 'respondent', content: '바이오시밀러 심사 과정에서 추가 임상 자료 요청이 있었습니다. 다만 심사 기간 단축을 위해 패스트트랙 제도 도입을 검토 중이며, 심사 인력도 내년까지 30% 확충할 계획입니다.', sort_order: '2' },
+    { statement_id: '20261023_bokji_001_s003', agenda_id: '20261023_bokji_001', speaker_name: '강기윤', speaker_party: '국민의힘', speaker_role: 'questioner', content: '바이오시밀러 패스트트랙이 도입되면 구체적으로 심사 기간이 얼마나 단축될 것으로 예상하십니까? 미국, 유럽과 비교 가능한 수준까지 줄일 수 있습니까?', sort_order: '3' },
+    { statement_id: '20261023_bokji_002_s001', agenda_id: '20261023_bokji_002', speaker_name: '최혜영', speaker_party: '더불어민주당', speaker_role: 'questioner', content: '건강보험 보장률이 65%에서 거의 10년째 정체입니다. 문재인케어 이후 비급여의 급여화가 사실상 중단된 것 아닙니까? 고가 항암제 급여 확대 계획은 어떻게 됩니까?', sort_order: '1' },
+    { statement_id: '20261023_bokji_002_s002', agenda_id: '20261023_bokji_002', speaker_name: '조규홍', speaker_party: '', speaker_role: 'respondent', content: '비급여 급여화는 재정 영향을 면밀히 분석하면서 단계적으로 추진하고 있습니다. 고가 항암제의 경우 위험분담계약 활용을 확대하여 환자 접근성과 재정 안정성을 동시에 확보하겠습니다.', sort_order: '2' },
+    { statement_id: '20261023_bokji_003_s001', agenda_id: '20261023_bokji_003', speaker_name: '이용호', speaker_party: '국민의힘', speaker_role: 'questioner', content: 'AI 의료기기 허가 건수가 300건을 넘었는데 실제 현장에서 활용되는 건 극소수입니다. 삼성바이오로직스가 AI 신약개발에 3,000억을 투자한다고 했는데, 정부 차원의 R&D 지원 연계 방안이 있습니까?', sort_order: '1' },
+    { statement_id: '20261023_bokji_003_s002', agenda_id: '20261023_bokji_003', speaker_name: '조규홍', speaker_party: '', speaker_role: 'respondent', content: 'AI 의료기기의 수가 체계 마련을 위해 건보공단과 협의 중입니다. 대기업의 AI 신약개발 투자에 대해서는 국가신약개발사업과 연계한 매칭 지원을 검토하겠습니다.', sort_order: '2' },
+    { statement_id: '20261023_bokji_004_s001', agenda_id: '20261023_bokji_004', speaker_name: '남인순', speaker_party: '더불어민주당', speaker_role: 'questioner', content: '합계출산율 0.72명입니다. 역대 최저치를 갱신하고 있는데, 현재의 양육 지원 정책으로는 한계가 명확하지 않습니까? 보다 파격적인 대책이 필요합니다.', sort_order: '1' },
+    { statement_id: '20261023_bokji_004_s002', agenda_id: '20261023_bokji_004', speaker_name: '조규홍', speaker_party: '', speaker_role: 'respondent', content: '내년부터 육아휴직 급여를 월 250만원으로 인상하고, 아이돌봄서비스 이용 대상을 중위소득 200%까지 확대할 계획입니다. 공공 영유아 보육시설도 500개소 추가 확충하겠습니다.', sort_order: '2' },
+    { statement_id: '20261021_bokji_001_s001', agenda_id: '20261021_bokji_001', speaker_name: '전혜숙', speaker_party: '더불어민주당', speaker_role: 'questioner', content: '한미약품이 비만 치료제 기술수출로 8조원 규모 계약을 체결했습니다. 국내 바이오 산업의 성과가 나오고 있는데, CDMO 분야에서 글로벌 경쟁력이 부족하다는 지적이 있습니다. 정부 지원 방안은?', sort_order: '1' },
+    { statement_id: '20261021_bokji_001_s002', agenda_id: '20261021_bokji_001', speaker_name: '조규홍', speaker_party: '', speaker_role: 'respondent', content: 'CDMO 분야 경쟁력 강화를 위해 바이오의약품 전용 산업단지 조성을 추진 중입니다. 또한 GMP 시설 현대화 지원과 전문 인력 양성 프로그램을 확대하겠습니다.', sort_order: '2' },
+    { statement_id: '20261021_bokji_002_s001', agenda_id: '20261021_bokji_002', speaker_name: '서영석', speaker_party: '더불어민주당', speaker_role: 'questioner', content: '지방의 중소병원에서 전문의를 구하지 못해 진료과를 폐쇄하는 사례가 속출하고 있습니다. 필수의료 분야 의사에 대한 실질적 보상 체계 개편 계획을 말씀해 주십시오.', sort_order: '1' },
+    { statement_id: '20261021_bokji_002_s002', agenda_id: '20261021_bokji_002', speaker_name: '조규홍', speaker_party: '', speaker_role: 'respondent', content: '필수의료 분야 수가를 평균 30% 인상하는 방안을 내년 건강보험 수가 협상에 반영할 예정입니다. 또한 지방 근무 의사에 대한 인센티브 제도를 강화하겠습니다.', sort_order: '2' },
+    { statement_id: '20261021_bokji_003_s001', agenda_id: '20261021_bokji_003', speaker_name: '김원이', speaker_party: '더불어민주당', speaker_role: 'questioner', content: '질병관리청의 감염병 대응 인력이 코로나 이후 오히려 줄었습니다. 신종 감염병 조기 경보 시스템은 어떤 수준까지 구축되어 있습니까?', sort_order: '1' },
+    { statement_id: '20261021_bokji_003_s002', agenda_id: '20261021_bokji_003', speaker_name: '지영미', speaker_party: '', speaker_role: 'respondent', content: 'AI 기반 감염병 감시 시스템을 내년 상반기까지 고도화할 계획입니다. 또한 권역별 감염병 전문병원 지정을 확대하고, 백신 원부자재 국산화율을 60%까지 높이겠습니다.', sort_order: '2' },
+    { statement_id: '20261025_gihoek_001_s001', agenda_id: '20261025_gihoek_001', speaker_name: '류성걸', speaker_party: '국민의힘', speaker_role: 'questioner', content: '보건복지부 예산 107조원 중 건강보험 국고지원이 12조인데, 법정 부담률 20%에 미치지 못합니다. 바이오헬스 R&D 예산도 작년 대비 삭감되었는데 이유가 무엇입니까?', sort_order: '1' },
+    { statement_id: '20261025_gihoek_001_s002', agenda_id: '20261025_gihoek_001', speaker_name: '조규홍', speaker_party: '', speaker_role: 'respondent', content: '건강보험 국고지원금은 보험료 수입 연동 방식으로 점진적 확대를 추진하고 있습니다. 바이오헬스 R&D의 경우 민간 투자 확대분을 감안한 것이나, 필수 분야 예산은 복원을 요청드리겠습니다.', sort_order: '2' },
+  ];
+
+  allNewsArticles = [
+    { article_id: '20261023_bokji_001_n001', agenda_id: '20261023_bokji_001', title: '식약처, 바이오시밀러 패스트트랙 도입 검토…심사 기간 6개월 단축 목표', url: '#', publisher: '한겨레' },
+    { article_id: '20261023_bokji_001_n002', agenda_id: '20261023_bokji_001', title: '셀트리온 "자가면역 바이오시밀러, FDA보다 4개월 늦어…규제 개선 절실"', url: '#', publisher: '매일경제' },
+    { article_id: '20261023_bokji_002_n001', agenda_id: '20261023_bokji_002', title: '건강보험 보장률 65% 정체…"고가 항암제 급여 확대 시급"', url: '#', publisher: 'KBS뉴스' },
+    { article_id: '20261023_bokji_003_n001', agenda_id: '20261023_bokji_003', title: '삼성바이오, AI 신약개발 플랫폼에 3천억 투자…정부 매칭 지원 논의', url: '#', publisher: '조선비즈' },
+    { article_id: '20261021_bokji_001_n001', agenda_id: '20261021_bokji_001', title: '한미약품 비만치료제 기술수출 8조원…K-바이오 위상 높아져', url: '#', publisher: 'MBC뉴스' },
+    { article_id: '20261021_bokji_001_n002', agenda_id: '20261021_bokji_001', title: '바이오 CDMO 시장 선점 경쟁…정부 "전용 산업단지 조성 추진"', url: '#', publisher: '연합뉴스' },
+    { article_id: '20261021_bokji_002_n001', agenda_id: '20261021_bokji_002', title: '지방 중소병원 진료과 폐쇄 속출…"필수의료 수가 30% 인상 추진"', url: '#', publisher: 'SBS뉴스' },
+    { article_id: '20261025_gihoek_001_n001', agenda_id: '20261025_gihoek_001', title: '복지부 예산 107조 심사…건보 국고지원·바이오 R&D가 쟁점', url: '#', publisher: '한국경제' },
+  ];
+
+  allProcessedVideos = [
+    { video_id: 'demo_v1', committee: '보건복지위원회', date: '2026-10-23', title: '제22대 국회 보건복지위원회 국정감사 (2일차)', video_url: '#', source: 'auto', subtitle_source: 'stenographer', processed_at: '2026-10-23 14:30:00', status: 'success', error_message: '' },
+    { video_id: 'demo_v2', committee: '보건복지위원회', date: '2026-10-21', title: '제22대 국회 보건복지위원회 국정감사 (1일차)', video_url: '#', source: 'auto', subtitle_source: 'auto_generated', processed_at: '2026-10-21 15:12:00', status: 'success', error_message: '' },
+    { video_id: 'demo_v3', committee: '기획재정위원회', date: '2026-10-25', title: '제22대 국회 기획재정위원회 예산결산소위 (복지부)', video_url: '#', source: 'manual', subtitle_source: 'stenographer', processed_at: '2026-10-25 16:45:00', status: 'success', error_message: '' },
+  ];
+
+  allUserKeywords = [
+    { keyword: '의약품', type: 'include', note: '의약품 허가/심사' },
+    { keyword: '바이오', type: 'include', note: '바이오의약품/바이오시밀러' },
+    { keyword: '건강보험', type: 'include', note: '건보 재정/보장성' },
+    { keyword: '제약', type: 'include', note: '' },
+    { keyword: '의료기기', type: 'include', note: 'AI 의료기기 포함' },
+    { keyword: '디지털 헬스케어', type: 'include', note: '' },
+    { keyword: '신약', type: 'include', note: '신약개발/기술수출' },
+    { keyword: '필수의료', type: 'include', note: '의료인력 수급' },
+    { keyword: 'CDMO', type: 'include', note: '위탁개발생산' },
+    { keyword: '의료 사고', type: 'exclude', note: '오탐 방지' },
+    { keyword: '의료 소송', type: 'exclude', note: '오탐 방지' },
+  ];
 }
 
 async function fetchSheetData(tabName) {

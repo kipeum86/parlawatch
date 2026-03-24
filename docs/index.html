@@ -7,19 +7,14 @@
   <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-  <!-- 비밀번호 게이트 -->
-  <div id="auth-gate" class="auth-gate">
-    <div class="auth-box">
-      <h2 class="auth-title">ParlaWatch</h2>
-      <p class="auth-desc">접근 비밀번호를 입력하세요.</p>
-      <input type="password" id="auth-password" class="auth-input" placeholder="비밀번호" onkeydown="if(event.key==='Enter')checkAuth()">
-      <button class="btn btn-primary btn-full" onclick="checkAuth()">확인</button>
-      <p id="auth-error" class="auth-error" style="display:none;">비밀번호가 틀렸습니다.</p>
-    </div>
+  <!-- 데모 배너 -->
+  <div id="demo-banner" style="background:linear-gradient(135deg,#1e3a5f,#2563eb);color:#fff;padding:10px 24px;text-align:center;font-size:13px;">
+    이 페이지는 의료/제약 산업 모니터링 <strong>예시 데모</strong>입니다. 실제 데이터가 아닌 샘플 데이터로 구성되어 있습니다.
+    &nbsp;·&nbsp; <a href="architecture.html" style="color:#93c5fd;text-decoration:underline;">시스템 아키텍처 보기</a>
   </div>
 
-  <!-- 본문 (인증 전 숨김) -->
-  <div id="app-content" style="display:none;">
+  <!-- 본문 -->
+  <div id="app-content">
 
   <!-- 헤더 -->
   <header class="header">
@@ -312,24 +307,7 @@
 
   </div><!-- /app-content -->
 
-  <script>
-    const AUTH_HASH = '5e884898da28047151d0e56f8dc6292773603d0d6aabbdd62a11ef721d1542d8'; // sha256('260320') - NOT actual check, see below
-    function checkAuth() {
-      const pw = document.getElementById('auth-password').value;
-      if (pw === '260320') {
-        localStorage.setItem('parlawatch_auth', 'ok');
-        document.getElementById('auth-gate').style.display = 'none';
-        document.getElementById('app-content').style.display = '';
-      } else {
-        document.getElementById('auth-error').style.display = 'block';
-      }
-    }
-    // 이미 인증된 경우 게이트 숨김 + 본문 표시
-    if (localStorage.getItem('parlawatch_auth') === 'ok') {
-      document.getElementById('auth-gate').style.display = 'none';
-      document.getElementById('app-content').style.display = '';
-    }
-  </script>
+  <script>/* auth removed for demo */</script>
   <script src="config.js"></script>
   <script src="app.js"></script>
   <script src="report.js"></script>
