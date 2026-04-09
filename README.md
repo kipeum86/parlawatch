@@ -335,4 +335,4 @@ config.example.yaml    — 게임산업 예시 설정
 
 ## 라이선스
 
-MIT
+[Apache License 2.0](LICENSE) 하에 배포됩니다.
